@@ -10,11 +10,9 @@ import (
 	"github.com/webworx-mt/oauth/models"
 )
 
-// GetUsersHandler returns a list of users
 func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Mock data for now
 	users := []models.User{
 		{
 			ID:        1,
@@ -36,11 +34,9 @@ func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
-// GetUserHandler returns a specific user by ID
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Extract user ID from URL path using our router
 	userIDStr := r.URL.Path[strings.LastIndex(r.URL.Path, "/")+1:]
 	if userIDStr == "" {
 		http.Error(w, "User ID is required", http.StatusBadRequest)
@@ -53,7 +49,6 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Mock data for now
 	user := models.User{
 		ID:        userID,
 		Email:     "user@example.com",
