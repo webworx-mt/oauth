@@ -1,20 +1,20 @@
-name: Deploy Infrastructure Stack
+name: Deploy Application Stack
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'cloudformation/infrastructure-cloudformation.yaml'
-      - '.github/workflows/deploy-cloudformation.yml'
+  workflow_run:
+    workflows: ["Build and Push to ECR"]
+    types: [completed]
+    branches: [main]
 
 env:
   AWS_REGION: eu-west-1
 
 jobs:
-  deploy-infrastructure:
-    name: Deploy Infrastructure Stack
+  deploy-application:
+    name: Deploy Application Stack
     runs-on: ubuntu-latest
     environment: production
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout
@@ -27,24 +27,24 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Validate Infrastructure template
+    - name: Validate Application template
       run: |
-        aws cloudformation validate-template --template-body file://cloudformation/infrastructure-cloudformation.yaml
+        aws cloudformation validate-template --template-body file://cloudformation/application-cloudformation.yaml
 
-    - name: Deploy Infrastructure Stack
+    - name: Deploy Application Stack
       run: |
         aws cloudformation deploy \
-          --template-file cloudformation/infrastructure-cloudformation.yaml \
-          --stack-name oauth-service-infrastructure \
+          --template-file cloudformation/application-cloudformation.yaml \
+          --stack-name oauth-service-application \
           --region ${{ env.AWS_REGION }} \
           --capabilities CAPABILITY_NAMED_IAM \
           --no-fail-on-empty-changeset
 
-    - name: Get infrastructure stack outputs
+    - name: Get application stack outputs
       run: |
-        echo "Infrastructure Stack outputs:"
+        echo "Application Stack outputs:"
         aws cloudformation describe-stacks \
-          --stack-name oauth-service-infrastructure \
+          --stack-name oauth-service-application \
           --region ${{ env.AWS_REGION }} \
           --query 'Stacks[0].Outputs' \
           --output table

@@ -1,18 +1,10 @@
 name: Build and Push to ECR
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'main.go'
-      - 'handlers/**'
-      - 'models/**'
-      - 'server/**'
-      - 'router/**'
-      - 'Dockerfile'
-      - '.dockerignore'
-      - 'go.mod'
-      - 'go.sum'
+  workflow_run:
+    workflows: ["Deploy Infrastructure Stack"]
+    types: [completed]
+    branches: [main]
 
 env:
   AWS_REGION: eu-west-1
@@ -22,6 +14,7 @@ jobs:
   build-and-push:
     name: Build and Push to ECR
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout
