@@ -1,4 +1,4 @@
-.PHONY: run build clean tidy
+.PHONY: run build clean tidy deploy-stack delete-stack health
 
 # Run the application using Docker
 run: tidy
@@ -16,6 +16,21 @@ clean:
 # Install dependencies
 tidy:
 	go mod tidy
+
+# Deploy CloudFormation stack
+deploy-stack:
+	aws cloudformation deploy \
+		--template-file cloudformation.yaml \
+		--stack-name oauth-service-stack \
+		--region eu-west-1 \
+		--capabilities CAPABILITY_NAMED_IAM \
+		--no-fail-on-empty-changeset
+
+# Delete CloudFormation stack
+delete-stack:
+	aws cloudformation delete-stack \
+		--stack-name oauth-service-stack \
+		--region eu-west-1
 
 # Check if the service is healthy
 health:
