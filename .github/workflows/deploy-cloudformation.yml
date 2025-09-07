@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'cloudformation.yaml'
+      - 'cloudformation/**'
       - '.github/workflows/deploy-cloudformation.yml'
 
 env:
@@ -28,24 +28,40 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Validate CloudFormation template
+    - name: Validate CloudFormation templates
       run: |
-        aws cloudformation validate-template --template-body file://cloudformation.yaml
+        aws cloudformation validate-template --template-body file://cloudformation/infrastructure-cloudformation.yaml
+        aws cloudformation validate-template --template-body file://cloudformation/application-cloudformation.yaml
 
-    - name: Deploy CloudFormation stack
+    - name: Deploy Infrastructure Stack
       run: |
         aws cloudformation deploy \
-          --template-file cloudformation.yaml \
-          --stack-name ${{ env.STACK_NAME }} \
+          --template-file cloudformation/infrastructure-cloudformation.yaml \
+          --stack-name oauth-service-infrastructure \
+          --region ${{ env.AWS_REGION }} \
+          --capabilities CAPABILITY_NAMED_IAM \
+          --no-fail-on-empty-changeset
+
+    - name: Deploy Application Stack
+      run: |
+        aws cloudformation deploy \
+          --template-file cloudformation/application-cloudformation.yaml \
+          --stack-name oauth-service-application \
           --region ${{ env.AWS_REGION }} \
           --capabilities CAPABILITY_NAMED_IAM \
           --no-fail-on-empty-changeset
 
     - name: Get stack outputs
       run: |
-        echo "Stack outputs:"
+        echo "Infrastructure Stack outputs:"
         aws cloudformation describe-stacks \
-          --stack-name ${{ env.STACK_NAME }} \
+          --stack-name oauth-service-infrastructure \
+          --region ${{ env.AWS_REGION }} \
+          --query 'Stacks[0].Outputs' \
+          --output table
+        echo "Application Stack outputs:"
+        aws cloudformation describe-stacks \
+          --stack-name oauth-service-application \
           --region ${{ env.AWS_REGION }} \
           --query 'Stacks[0].Outputs' \
           --output table

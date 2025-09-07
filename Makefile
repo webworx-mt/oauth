@@ -17,20 +17,41 @@ clean:
 tidy:
 	go mod tidy
 
-# Deploy CloudFormation stack
-deploy-stack:
+# Deploy infrastructure stack
+deploy-infrastructure:
 	aws cloudformation deploy \
-		--template-file cloudformation.yaml \
-		--stack-name oauth-service-stack \
+		--template-file cloudformation/infrastructure-cloudformation.yaml \
+		--stack-name oauth-service-infrastructure \
 		--region eu-west-1 \
 		--capabilities CAPABILITY_NAMED_IAM \
 		--no-fail-on-empty-changeset
 
-# Delete CloudFormation stack
-delete-stack:
+# Deploy application stack
+deploy-application:
+	aws cloudformation deploy \
+		--template-file cloudformation/application-cloudformation.yaml \
+		--stack-name oauth-service-application \
+		--region eu-west-1 \
+		--capabilities CAPABILITY_NAMED_IAM \
+		--no-fail-on-empty-changeset
+
+# Deploy both stacks
+deploy-all: deploy-infrastructure deploy-application
+
+# Delete application stack
+delete-application:
 	aws cloudformation delete-stack \
-		--stack-name oauth-service-stack \
+		--stack-name oauth-service-application \
 		--region eu-west-1
+
+# Delete infrastructure stack
+delete-infrastructure:
+	aws cloudformation delete-stack \
+		--stack-name oauth-service-infrastructure \
+		--region eu-west-1
+
+# Delete both stacks
+delete-all: delete-application delete-infrastructure
 
 # Check if the service is healthy
 health:
