@@ -57,7 +57,7 @@ Resources:
               Service: build.apprunner.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AppRunnerServicePolicyForECRAccess
+        - arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess
 
   # App Runner Service
   AppRunnerService:
@@ -69,7 +69,9 @@ Resources:
           ImageIdentifier: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepositoryName}:${ImageTag}'
           ImageConfiguration:
             Port: '8080'
-            RuntimeEnvironmentVariables: {}
+            RuntimeEnvironmentVariables:
+              - Name: PORT
+                Value: '8080'
           ImageRepositoryType: ECR
         AutoDeploymentsEnabled: true
         AuthenticationConfiguration:
