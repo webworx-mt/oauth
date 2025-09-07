@@ -16,7 +16,7 @@ func StartServer(port string) {
 	r.GET("/users", handlers.GetUsersHandler)
 	r.GET("/user/:id", handlers.GetUserHandler)
 
-	fmt.Printf("OAuth service starting on port %s\n", port)
+	fmt.Printf("OAuth service is running on port %s\n", port)
 
 	log.Fatal(http.ListenAndServe(port, r))
 }
