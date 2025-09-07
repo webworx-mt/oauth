@@ -1,18 +1,18 @@
-name: Deploy Infrastructure Stack
+name: Deploy ECR CloudFormation
 
 on:
   push:
     branches: [ main ]
     paths:
-      - 'cloudformation/infrastructure-cloudformation.yaml'
+      - 'cloudformation/ecr-cloudformation.yaml'
       - '.github/workflows/deploy-cloudformation.yml'
 
 env:
   AWS_REGION: eu-west-1
 
 jobs:
-  deploy-infrastructure:
-    name: Deploy Infrastructure Stack
+  deploy-ecr-cf:
+    name: Deploy ECR CloudFormation
     runs-on: ubuntu-latest
     environment: production
 
@@ -27,24 +27,24 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Validate Infrastructure template
+    - name: Validate ECR template
       run: |
-        aws cloudformation validate-template --template-body file://cloudformation/infrastructure-cloudformation.yaml
+        aws cloudformation validate-template --template-body file://cloudformation/ecr-cloudformation.yaml
 
-    - name: Deploy Infrastructure Stack
+    - name: Deploy ECR Stack
       run: |
         aws cloudformation deploy \
-          --template-file cloudformation/infrastructure-cloudformation.yaml \
-          --stack-name oauth-service-infrastructure \
+          --template-file cloudformation/ecr-cloudformation.yaml \
+          --stack-name oauth-service-ecr \
           --region ${{ env.AWS_REGION }} \
           --capabilities CAPABILITY_NAMED_IAM \
           --no-fail-on-empty-changeset
 
-    - name: Get infrastructure stack outputs
+    - name: Get ECR stack outputs
       run: |
-        echo "Infrastructure Stack outputs:"
+        echo "ECR Stack outputs:"
         aws cloudformation describe-stacks \
-          --stack-name oauth-service-infrastructure \
+          --stack-name oauth-service-ecr \
           --region ${{ env.AWS_REGION }} \
           --query 'Stacks[0].Outputs' \
           --output table

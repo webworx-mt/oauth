@@ -34,7 +34,7 @@ Resources:
           ImageRepositoryType: ECR
         AutoDeploymentsEnabled: true
         AuthenticationConfiguration:
-          AccessRoleArn: !ImportValue 'oauth-service-infrastructure-AppRunnerECRAccessRoleArn'
+          AccessRoleArn: !ImportValue 'oauth-service-ecr-AppRunnerECRAccessRoleArn'
       InstanceConfiguration:
         Cpu: '1024'
         Memory: '2048'

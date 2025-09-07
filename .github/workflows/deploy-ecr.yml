@@ -2,7 +2,7 @@ name: Build and Push to ECR
 
 on:
   workflow_run:
-    workflows: ["Deploy Infrastructure Stack"]
+    workflows: ["Deploy ECR CloudFormation"]
     types: [completed]
     branches: [main]
 

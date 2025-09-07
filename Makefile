@@ -17,11 +17,11 @@ clean:
 tidy:
 	go mod tidy
 
-# Deploy infrastructure stack
-deploy-infrastructure:
+# Deploy ECR stack
+deploy-ecr-cf:
 	aws cloudformation deploy \
-		--template-file cloudformation/infrastructure-cloudformation.yaml \
-		--stack-name oauth-service-infrastructure \
+		--template-file cloudformation/ecr-cloudformation.yaml \
+		--stack-name oauth-service-ecr \
 		--region eu-west-1 \
 		--capabilities CAPABILITY_NAMED_IAM \
 		--no-fail-on-empty-changeset
@@ -36,7 +36,7 @@ deploy-application:
 		--no-fail-on-empty-changeset
 
 # Deploy both stacks
-deploy-all: deploy-infrastructure deploy-application
+deploy-all: deploy-ecr-cf deploy-application
 
 # Delete application stack
 delete-application:
@@ -44,14 +44,14 @@ delete-application:
 		--stack-name oauth-service-application \
 		--region eu-west-1
 
-# Delete infrastructure stack
-delete-infrastructure:
+# Delete ECR stack
+delete-ecr-cf:
 	aws cloudformation delete-stack \
-		--stack-name oauth-service-infrastructure \
+		--stack-name oauth-service-ecr \
 		--region eu-west-1
 
 # Delete both stacks
-delete-all: delete-application delete-infrastructure
+delete-all: delete-application delete-ecr-cf
 
 # Check if the service is healthy
 health:
