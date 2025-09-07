@@ -34,6 +34,7 @@ Resources:
                 "description": "Keep last 10 images",
                 "selection": {
                   "tagStatus": "tagged",
+                  "tagPrefixList": ["*"],
                   "countType": "imageCountMoreThan",
                   "countNumber": 10
                 },
