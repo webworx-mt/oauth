@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'OAuth Service - App Runner with ECR'
+
+Parameters:
+  ECRRepositoryName:
+    Type: String
+    Default: oauth-service
+    Description: Name of the ECR repository
+  
+  ImageTag:
+    Type: String
+    Default: latest
+    Description: Docker image tag to deploy
+  
+  ServiceName:
+    Type: String
+    Default: oauth-service
+    Description: Name of the App Runner service
+
+Resources:
+  # ECR Repository
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref ECRRepositoryName
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 10 images",
+                "selection": {
+                  "tagStatus": "tagged",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  # IAM Role for App Runner to access ECR
+  AppRunnerECRAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ServiceName}AppRunnerECRAccessRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: build.apprunner.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AppRunnerServicePolicyForECRAccess
+
+  # App Runner Service
+  AppRunnerService:
+    Type: AWS::AppRunner::Service
+    Properties:
+      ServiceName: !Ref ServiceName
+      SourceConfiguration:
+        ImageRepository:
+          ImageIdentifier: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepositoryName}:${ImageTag}'
+          ImageConfiguration:
+            Port: '8080'
+            RuntimeEnvironmentVariables: {}
+          ImageRepositoryType: ECR
+        AutoDeploymentsEnabled: true
+        AuthenticationConfiguration:
+          AccessRoleArn: !GetAtt AppRunnerECRAccessRole.Arn
+      InstanceConfiguration:
+        Cpu: '1024'
+        Memory: '2048'
+      HealthCheckConfiguration:
+        Protocol: TCP
+        Path: '/'
+        Interval: 10
+        Timeout: 5
+        HealthyThreshold: 1
+        UnhealthyThreshold: 5
+      NetworkConfiguration:
+        EgressConfiguration:
+          EgressType: DEFAULT
+        IngressConfiguration:
+          IsPubliclyAccessible: true
+        IpAddressType: IPV4
+      ObservabilityConfiguration:
+        ObservabilityEnabled: false
+
+Outputs:
+  ServiceUrl:
+    Description: 'App Runner Service URL'
+    Value: !GetAtt AppRunnerService.ServiceUrl
+    Export:
+      Name: !Sub '${AWS::StackName}-ServiceUrl'
+  
+  ServiceArn:
+    Description: 'App Runner Service ARN'
+    Value: !Ref AppRunnerService
+    Export:
+      Name: !Sub '${AWS::StackName}-ServiceArn'
+  
+  ECRRepositoryUri:
+    Description: 'ECR Repository URI'
+    Value: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepositoryName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-ECRRepositoryUri'
