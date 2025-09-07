@@ -8,7 +8,6 @@ import (
 	"github.com/webworx-mt/oauth/models"
 )
 
-// HealthHandler handles health check requests
 func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

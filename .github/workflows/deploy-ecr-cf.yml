@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'cloudformation/ecr-cloudformation.yaml'
-      - '.github/workflows/deploy-cloudformation.yml'
+      - '.github/workflows/deploy-ecr-cf.yml'
 
 env:
   AWS_REGION: eu-west-1
