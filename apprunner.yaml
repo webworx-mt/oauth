@@ -1,15 +1,14 @@
 version: 1.0
-runtime: docker
+runtime: go1
 build:
   commands:
     build:
-      - echo "Building OAuth service..."
-      - docker build -t oauth-service .
+      - go build -o oauth-service .
 run:
-  command: docker run -p 8080:8080 oauth-service
+  runtime-version: 1.25
+  command: ./oauth-service
   network:
     port: 8080
-    env: PORT
   env:
     - name: PORT
       value: "8080"
