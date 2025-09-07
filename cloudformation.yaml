@@ -33,8 +33,7 @@ Resources:
                 "rulePriority": 1,
                 "description": "Keep last 10 images",
                 "selection": {
-                  "tagStatus": "tagged",
-                  "tagPrefixList": ["*"],
+                  "tagStatus": "any",
                   "countType": "imageCountMoreThan",
                   "countNumber": 10
                 },
