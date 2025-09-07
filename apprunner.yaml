@@ -6,7 +6,6 @@ build:
       - echo "Building OAuth service..."
       - docker build -t oauth-service .
 run:
-  runtime-version: latest
   command: docker run -p 8080:8080 oauth-service
   network:
     port: 8080
