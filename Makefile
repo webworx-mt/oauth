@@ -27,16 +27,16 @@ deploy-ecr-cf:
 		--no-fail-on-empty-changeset
 
 # Deploy application stack
-deploy-application:
+deploy-apprunner-cf:
 	aws cloudformation deploy \
-		--template-file cloudformation/application-cloudformation.yaml \
+		--template-file cloudformation/apprunner-cloudformation.yaml \
 		--stack-name oauth-service-application \
 		--region eu-west-1 \
 		--capabilities CAPABILITY_NAMED_IAM \
 		--no-fail-on-empty-changeset
 
 # Deploy both stacks
-deploy-all: deploy-ecr-cf deploy-application
+deploy-all: deploy-ecr-cf deploy-apprunner-cf
 
 # Delete application stack
 delete-application:

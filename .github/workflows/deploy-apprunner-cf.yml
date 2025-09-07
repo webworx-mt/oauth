@@ -29,12 +29,12 @@ jobs:
 
     - name: Validate Application template
       run: |
-        aws cloudformation validate-template --template-body file://cloudformation/application-cloudformation.yaml
+        aws cloudformation validate-template --template-body file://cloudformation/apprunner-cloudformation.yaml
 
     - name: Deploy Application Stack
       run: |
         aws cloudformation deploy \
-          --template-file cloudformation/application-cloudformation.yaml \
+          --template-file cloudformation/apprunner-cloudformation.yaml \
           --stack-name oauth-service-application \
           --region ${{ env.AWS_REGION }} \
           --capabilities CAPABILITY_NAMED_IAM \
