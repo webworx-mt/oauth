@@ -3,8 +3,16 @@ name: Build and Push to ECR
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    paths:
+      - 'main.go'
+      - 'handlers/**'
+      - 'models/**'
+      - 'server/**'
+      - 'router/**'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'go.mod'
+      - 'go.sum'
 
 env:
   AWS_REGION: eu-west-1
