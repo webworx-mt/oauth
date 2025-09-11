@@ -15,13 +15,8 @@ This service is built with:
 
 ```
 oauth/
-├── cloudformation/           # AWS CloudFormation templates
-│   ├── ecr-cloudformation.yaml      # ECR repository and IAM roles
-│   └── apprunner-cloudformation.yaml # AppRunner service configuration
 ├── .github/workflows/        # GitHub Actions workflows
-│   ├── deploy-ecr-cf.yml           # Deploy ECR infrastructure
-│   ├── deploy-ecr.yml              # Build and push Docker images
-│   └── deploy-apprunner-cf.yml     # Deploy AppRunner service
+│   └── deploy.yml            # Triggers centralized deployment
 ├── handlers/                 # HTTP request handlers
 │   ├── health.go             # Health check endpoint
 │   └── user.go               # User management endpoints
@@ -33,10 +28,11 @@ oauth/
 ├── server/                   # Server configuration
 │   └── server.go             # Server startup logic
 ├── main.go                   # Application entry point
+├── deployment.yaml           # Deployment configuration
 ├── Dockerfile                # Container build instructions
 ├── docker-compose.yaml       # Local development setup
 ├── go.mod                    # Go module dependencies
-└── Makefile                  # Build and deployment commands
+└── Makefile                  # Local development commands
 ```
 
 ## 🚀 API Endpoints
@@ -91,55 +87,54 @@ make health           # Check service health
 
 ## ☁️ AWS Deployment
 
-### Infrastructure Components
+This service uses a centralized deployment system that handles all deployment complexity automatically.
 
-1. **ECR Repository** (`oauth-service-ecr`)
-   - Container image registry
-   - Lifecycle policy (keeps last 10 images)
-   - IAM role for AppRunner access
+### Automatic Deployment
 
-2. **AppRunner Service** (`oauth-service-application`)
-   - Auto-scaling container service
-   - Public endpoint
-   - Health check configuration
+The service is deployed automatically when you push to the `main` or `master` branch. The deployment is handled by the centralized deployment system at [webworx-mt/deployment](https://github.com/webworx-mt/deployment).
 
-### Deployment Workflows
+### Configuration
 
-The project uses three GitHub Actions workflows:
+The deployment is configured via the `deployment.yaml` file in the root directory:
 
-1. **`deploy-ecr-cf.yml`** - Deploys ECR infrastructure
-   - Triggers: Changes to `cloudformation/ecr-cloudformation.yaml`
-   - Creates ECR repository and IAM roles
+```yaml
+app:
+  name: oauth-service
+  type: go-apprunner
+  version: "1.0.0"
 
-2. **`deploy-ecr.yml`** - Builds and pushes Docker images
-   - Triggers: After ECR CloudFormation deployment
-   - Builds Go application and pushes to ECR
+deployment:
+  environment: production
+  region: eu-west-1
+  port: 8080
+  cpu: "1 vCPU"
+  memory: "2 GB"
+  scaling:
+    min_instances: 1
+    max_instances: 10
+    target_cpu: 70
+  health_check:
+    path: "/health"
+    interval: 30
+    timeout: 5
+    healthy_threshold: 2
+    unhealthy_threshold: 3
+```
 
-3. **`deploy-apprunner-cf.yml`** - Deploys AppRunner service
-   - Triggers: After ECR image build
-   - Deploys AppRunner service using latest image
+### Required GitHub Secrets
+
+Configure this secret in your GitHub repository:
+
+- `DEPLOYMENT_TOKEN` - GitHub Personal Access Token for triggering deployments
 
 ### Manual Deployment
 
-You can also deploy manually using the Makefile:
+You can trigger a manual deployment:
 
-```bash
-# Deploy ECR infrastructure
-make deploy-ecr-cf
-
-# Deploy AppRunner service
-make deploy-apprunner-cf
-
-# Deploy both stacks
-make deploy-all
-```
-
-### Required AWS Secrets
-
-Configure these secrets in your GitHub repository:
-
-- `AWS_ACCESS_KEY_ID` - AWS access key
-- `AWS_SECRET_ACCESS_KEY` - AWS secret key
+1. Go to [Actions](https://github.com/webworx-mt/deployment/actions)
+2. Run "Deploy Go App Runner Application"
+3. Enter your repository name (`webworx-mt/oauth`)
+4. Click "Run workflow"
 
 ## 🔧 Configuration
 
@@ -188,10 +183,13 @@ curl http://localhost:8080/health
 
 ## 🔄 CI/CD Pipeline
 
-The deployment pipeline follows this sequence:
+The deployment pipeline is handled by the centralized deployment system:
 
-1. **ECR Infrastructure** → Creates ECR repository and IAM roles
-2. **Image Build** → Builds and pushes Docker image to ECR
-3. **AppRunner Deployment** → Deploys service using the new image
+1. **Trigger** → Push to main/master branch or manual trigger
+2. **Centralized Deployment** → [webworx-mt/deployment](https://github.com/webworx-mt/deployment) handles:
+   - ECR repository creation and lifecycle policies
+   - Docker image build and push
+   - AppRunner service deployment
+   - Infrastructure management via CloudFormation
 
-Each step triggers the next, creating a complete automated deployment pipeline.
+This creates a simple, consistent deployment process across all applications.

@@ -1,0 +1,21 @@
+app:
+  name: oauth-service
+  type: go-apprunner
+  version: "1.0.0"
+
+deployment:
+  environment: production
+  region: eu-west-1
+  port: 8080
+  cpu: "1 vCPU"
+  memory: "2 GB"
+  scaling:
+    min_instances: 1
+    max_instances: 10
+    target_cpu: 70
+  health_check:
+    path: "/health"
+    interval: 30
+    timeout: 5
+    healthy_threshold: 2
+    unhealthy_threshold: 3
